@@ -1,0 +1,28 @@
+version: '2'
+services:
+  bot:
+    build:
+      dockerfile: Dockerfile.bot
+
+  sender:
+    build:
+      args:
+        TOKEN: $BOT_TOKEN
+      context: ./sender
+      dockerfile: Dockerfile.sender
+    env_file:
+      - .env
+    ports:
+      - "8081:8081"
+    depends_on:
+     - bot
+
+  lt:
+    build:
+      context: lt
+      dockerfile: Dockerfile.lt
+    env_file:
+      - .env
+    command: "usr/local/bin/lt -p 8081 --local-host sender -s $SENDER_SUBDOMAIN"
+    depends_on:
+     - sender
