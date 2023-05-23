@@ -17,24 +17,30 @@ services:
     depends_on:
      - bot
 
-  lt:
-    build:
-      context: lt
-      dockerfile: Dockerfile.lt
-    env_file:
-      - .env
-    command: "usr/local/bin/lt -p 8081 --local-host sender -s $SENDER_SUBDOMAIN"
-    depends_on:
-     - sender
-
   whisper:
     build:
       context: whisper
       dockerfile: Dockerfile.whisper
+    env_file:
+      - .env
     ports:
       - "5050:5050"
     volumes:
       - 'whisper_data:/root/.cache/huggingface'
+
+  lt-sender:
+    image: efrecon/localtunnel
+    command:
+      --local-host sender -p 8081 -s $SENDER_SUBDOMAIN
+    depends_on:
+      - sender
+
+  lt-whisper:
+    image: efrecon/localtunnel
+    command:
+      --local-host whisper -p 5050 -s $WHISPER_SUBDOMAIN
+    depends_on:
+      - whisper
 
 volumes:
   whisper_data:

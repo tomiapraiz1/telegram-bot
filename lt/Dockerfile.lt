@@ -1,5 +1,0 @@
-FROM node
-
-RUN npm install -g localtunnel
-
-RUN npm install -g npm@9.6.6

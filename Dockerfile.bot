@@ -1,10 +1,11 @@
-FROM python:3.9-buster
+FROM python:3.10-slim
 
 WORKDIR /app
 
+RUN apt update
 RUN apt-get update
 RUN apt-get install xz-utils
-RUN apt install wget
+RUN apt install -y wget
 RUN pip install --upgrade pip
 
 COPY requirements.txt requirements.txt
