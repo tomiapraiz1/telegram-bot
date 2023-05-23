@@ -26,3 +26,16 @@ services:
     command: "usr/local/bin/lt -p 8081 --local-host sender -s $SENDER_SUBDOMAIN"
     depends_on:
      - sender
+
+  whisper:
+    build:
+      context: whisper
+      dockerfile: Dockerfile.whisper
+    ports:
+      - "5050:5050"
+    volumes:
+      - 'whisper_data:/root/.cache/huggingface'
+
+volumes:
+  whisper_data:
+    driver: local

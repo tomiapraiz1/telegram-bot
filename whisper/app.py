@@ -1,47 +1,36 @@
+import re
 from flask import Flask, request
-from tempfile import NamedTemporaryFile
-import whisper
-import torch
+from faster_whisper import WhisperModel
 
-# Check if NVIDIA GPU is available
-torch.cuda.is_available()
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-# Load the Whisper model:
-model = whisper.load_model("base", device=DEVICE)
+model_size = "base"
+model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route('/')
 def index():
     return "Whisper running!"
-
 
 @app.route('/whisper', methods=['POST'])
 def whisper():
     if not request.files:
         return "Falta el archivo a traducir", 400
+    
+    archivo = request.files['file']
+    
+    segments, info = model.transcribe(archivo, beam_size=5)
 
-    # For each file, let's store the results in a list of dictionaries.
-    results = []
+    print("Lenguaje detectado '%s' con probabilidad %f" % (info.language, info.language_probability))
 
-    # Loop over every file that the user submitted.
-    for handle in request.files.items():
-        # Create a temporary file.
-        # The location of the temporary file is available in `temp.name`.
-        temp = NamedTemporaryFile()
-        # Write the user's uploaded file to the temporary file.
-        # The file will get deleted when it drops out of scope.
-        handle.save(temp)
-        # Let's get the transcript of the temporary file.
-        result = model.transcribe(temp.name)
-        # Now we can store the result object for this file.
-        results.append({
-            'transcript': result['text'],
-        })
+    transcription = ""
+    
+    for segment in segments:
+        transcription += ("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
 
-    # This will be automatically converted to JSON.
-    return {'results': results}
+    transcription_complete = re.sub(r"\[(.*?)\]", "", transcription)
+    print(transcription_complete)
+
+    return {'nombre del archivo': archivo.filename, 'transcripcion': transcription_complete}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, debug=True)

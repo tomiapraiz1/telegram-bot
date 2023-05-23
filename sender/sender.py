@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/', methods = ['GET'])
 def index():
-   return "TELEGRAM BOT", 200
+   return "TELEGRAM BOT SENDER", 200
 
 telegram_bot = Bot(token=bot_token)
 
