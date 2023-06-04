@@ -34,6 +34,7 @@ services:
       --local-host sender -p 8081 -s $SENDER_SUBDOMAIN
     depends_on:
       - sender
+    restart: always
 
   lt-whisper:
     image: efrecon/localtunnel
@@ -41,6 +42,8 @@ services:
       --local-host whisper -p 5050 -s $WHISPER_SUBDOMAIN
     depends_on:
       - whisper
+    restart: always
+      
 
 volumes:
   whisper_data:
