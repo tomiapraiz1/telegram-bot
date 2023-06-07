@@ -1,6 +1,8 @@
 # Faster Whisper
 
-Para la utilizacion del Whisper, se debe completar el campo WHISPER_SUBDOMAIN en el archivo .env creado. Esto nos dara una url conformada de la siguiente forma:
+Whisper se utiliza para transcribir de voz a texto.
+
+Para la utilizacion del mismo, se debe completar el campo WHISPER_SUBDOMAIN en el archivo .env creado. Esto nos dara una url conformada de la siguiente forma:
 ```
 https://example.loca.lt
 ```
