@@ -1,6 +1,6 @@
 from telegram import Bot
 from flask import Flask, request
-import os
+import os, codecs, json
 
 bot_token = os.environ.get("BOT_TOKEN")
 app = Flask(__name__)
@@ -19,7 +19,10 @@ def send_message():
     except:
         return "Faltan parametros del json", 400
     
-    telegram_bot.send_message(chat_id=chatid, text=msg)
+    msg = json.dumps(msg)
+    
+    msg_decodificado = codecs.decode(msg, 'unicode_escape')    
+    telegram_bot.send_message(chat_id=chatid, text=msg_decodificado)
 
     return "Mensaje enviado", 200
 

@@ -3,6 +3,7 @@ services:
   bot:
     build:
       dockerfile: Dockerfile.bot
+    restart: always
 
   sender:
     build:
@@ -16,6 +17,7 @@ services:
       - "8081:8081"
     depends_on:
      - bot
+    restart: always
 
   whisper:
     build:
@@ -27,6 +29,7 @@ services:
       - "5050:5050"
     volumes:
       - 'whisper_data:/root/.cache/huggingface'
+    restart: always
 
   lt-sender:
     image: efrecon/localtunnel

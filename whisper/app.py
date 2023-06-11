@@ -1,8 +1,8 @@
-import re, os
-from flask import Flask, request
+import re, os, html
+from flask import Flask, request, Response
 from faster_whisper import WhisperModel
-from moviepy.editor import VideoFileClip
 from pytube import YouTube
+from gtts import gTTS
 
 model_size = "base"
 model = WhisperModel(model_size, device="cpu", compute_type="int8")
@@ -10,6 +10,9 @@ model = WhisperModel(model_size, device="cpu", compute_type="int8")
 app = Flask(__name__)
 
 def transcript(archivo):
+    """
+        Devuelve la transcripcion completa de un archivo de audio o video
+    """
     segments, info = model.transcribe(archivo, beam_size=5)
 
     print("Lenguaje detectado '%s' con probabilidad %f" % (info.language, info.language_probability))
@@ -28,8 +31,36 @@ def transcript(archivo):
 def index():
     return "Whisper running!"
 
-@app.route('/transcript', methods=['GET'])
-def download():
+@app.route('/tts', methods=['POST'])
+def tts():
+    """
+        Devuelve un archivo .mp3 con el texto pedido
+    """
+    try:
+        text = request.json.get("text")
+    except:
+        return "Falta el texto a convertir", 400
+    
+
+    tts = gTTS(text, lang='es', tld='com.mx', slow=False)
+    filename = 'output.mp3'
+    script_dir = os.path.dirname(__file__)
+    save_path = os.path.join(script_dir, filename)
+    tts.save(save_path)
+    
+    with open(save_path, 'rb') as f:
+        mp3_data = f.read()
+
+    response = Response(mp3_data, mimetype='audio/mpeg')
+    response.headers.set('Content-Disposition', 'attachment', filename=filename)
+
+    return response
+
+@app.route('/transcript', methods=['POST'])
+def transcription():
+    """
+        Devuelve la transcripcion en un JSON junto al titulo del video/audio
+    """
     try:
         url = request.json.get("url")
     except:
@@ -38,19 +69,15 @@ def download():
     video = YouTube(url).streams.filter(type='video',file_extension='mp4',progressive=True).first().download()
     titulo = YouTube(url).streams.filter(type='video',file_extension='mp4',progressive=True).first().title
     video = video.replace("3gpp","mp4")
-    audioname = "test_audio.wav"
-
-    videoclip = VideoFileClip(video) #Hacemos que el video se guarde en formato video en la variable
-    audioclip = videoclip.audio #Pasamos el video a formato audio
-    audioclip.write_audiofile(audioname) #Escribimos el audio en formato wav
     
-    archivo = audioname
-    transcripcion = transcript(archivo)
+    transcripcion = transcript(video)
 
-    if os.path.exists("test_audio.wav"):
-        os.remove("test_audio.wav")
+    if os.path.exists(video):
+        os.remove(video)
 
-    return {'nombre del archivo': titulo, 'transcripcion': transcripcion}
+    transcripcion_decodificada = html.unescape(transcripcion)
+
+    return  {'nombre del archivo': titulo, 'transcripcion': transcripcion_decodificada}, 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050)
+    app.run(host='0.0.0.0', port=5050, debug=True)

@@ -2,3 +2,4 @@ flask
 faster-whisper
 moviepy==1.0.3
 pytube==15.0.0
+gTTS
