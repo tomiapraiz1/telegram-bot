@@ -1,13 +1,37 @@
 import re, os, html
 from flask import Flask, request, Response
 from faster_whisper import WhisperModel
-from pytube import YouTube
 from gtts import gTTS
+import yt_dlp
 
 model_size = "base"
 model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 app = Flask(__name__)
+
+def download_video(url):
+    """
+        Descarga el video de Youtube y lo devuelve
+    """
+    ydl_opts = {
+        'format': 'm4a/bestaudio/best',
+        'postprocessors': [{  # Extract audio using ffmpeg
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'm4a',
+        }]
+    }
+
+    video_id = None
+    for part in url.split("?"):
+        if part.startswith("v="):
+            video_id = part[2:]
+            break
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        video = ydl.extract_info(url)
+        title = video['title']
+
+    return f'{title} [{video_id}].m4a'
 
 def transcript(archivo):
     """
@@ -66,9 +90,7 @@ def transcription():
     except:
         return "Falta la url", 400
     
-    video = YouTube(url).streams.filter(type='video',file_extension='mp4',progressive=True).first().download()
-    titulo = YouTube(url).streams.filter(type='video',file_extension='mp4',progressive=True).first().title
-    video = video.replace("3gpp","mp4")
+    video = download_video(url)
     
     transcripcion = transcript(video)
 
@@ -77,7 +99,7 @@ def transcription():
 
     transcripcion_decodificada = html.unescape(transcripcion)
 
-    return  {'nombre del archivo': titulo, 'transcripcion': transcripcion_decodificada}, 200
+    return  {'transcripcion': transcripcion_decodificada}, 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, debug=True)
