@@ -1,6 +1,6 @@
 from telegram import Bot
 from flask import Flask, request
-import os, codecs, json
+import os, codecs, json, re
 import requests
 
 bot_token = os.environ.get("BOT_TOKEN")
@@ -15,7 +15,7 @@ def download_file_from_drive(url, name):
 
     # Realiza la solicitud GET para descargar el archivo
     response = requests.get(download_url)
-
+    
     destination_file_path = f'{name}.pdf'
 
     # Guarda el archivo descargado
@@ -36,8 +36,8 @@ def send_file():
         chatid = request.json.get("chatid")
         url = request.json.get("url")
         name = request.json.get("name")
-    except:
-        return "Faltan parámetros del json", 400
+    except Exception as e:
+        return f'Error: {e}', 400
     
     try:
         # Descargar el archivo y obtener la ruta del archivo descargado
