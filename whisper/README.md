@@ -2,19 +2,19 @@
 
 Whisper se utiliza para transcribir de voz a texto.
 
-Para la utilizacion del mismo, se debe completar el campo WHISPER_SUBDOMAIN en el archivo .env creado. Esto nos dara una url conformada de la siguiente forma:
-```
-https://example.loca.lt
-```
-Siendo "example" el subdominio elegido.
-
 ## Utilizacion de la aplicacion
 
-Se debe realizar una peticion POST a la siguiente url:
+Para la utilizacion del mismo, se debe completar el campo WHISPER_PORT en el archivo .env creado.
+Se debe realizar una peticion POST a la direccion local, con el puerto asignado en WHISPER_PORT (por ejemplo: 5050):
+
 ```
-https://example.loca.lt/send
+http://127.0.0.1:5050/send
 ```
-La misma debe ser enviada con un archivo, ya sea de audio o video y dara una respuesta en formato JSON con los siguientes campos:
+
+En este caso debemos utilizar el entorno local, ya que si enviamos un audio/video largo la peticion dara timeout. La aplicacion esta probada en un Intel Core I5 9400 y tarda en promedio 3min 30s en responder a un audio de 11min.
+
+La peticion debe ser enviada con un archivo, ya sea de audio o video y dara una respuesta en formato JSON con los siguientes campos:
+
 ```
 {
     'nombre del archivo': "nombre",

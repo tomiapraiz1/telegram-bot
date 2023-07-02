@@ -26,7 +26,7 @@ services:
     env_file:
       - .env
     ports:
-      - "5050:5050"
+      - "${WHISPER_PORT}:5050"
     volumes:
       - 'whisper_data:/root/.cache/huggingface'
     restart: always
@@ -38,16 +38,7 @@ services:
     depends_on:
       - sender
     restart: always
-
-  lt-whisper:
-    image: efrecon/localtunnel
-    command:
-      --local-host whisper -p 5050 -s $WHISPER_SUBDOMAIN
-    depends_on:
-      - whisper
-    restart: always
       
-
 volumes:
   whisper_data:
     driver: local
