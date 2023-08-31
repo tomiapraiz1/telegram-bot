@@ -17,7 +17,7 @@ Siendo "example" el subdominio elegido.
 
 Al bot que creamos debemos pedirle el "chatid" nuestro para posteriormente utilizarlo en las peticiones. Esto se realiza mandando un mensaje "/start".
 
-Para enviar un mensaje se debe realizar una peticion POST a la siguiente url:
+Para enviar un mensaje se debe realizar una petición POST a la siguiente url:
 ```
 https://example.loca.lt/send
 ```
